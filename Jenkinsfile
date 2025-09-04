@@ -16,17 +16,9 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh 'mvn clean package -DskipTests'
+                sh 'mvn clean package -DskipTests -U'
             }
-        }
-
-        stage('Deploy to Tomcat') {
-            steps {
-                sh '''
-                cp target/*.jar /opt/tomcat/webapps/
-                '''
-            }
-        }
+        }       
     }
 }
 
