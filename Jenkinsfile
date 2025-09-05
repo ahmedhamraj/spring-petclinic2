@@ -19,6 +19,11 @@ pipeline {
                 sh 'mvn clean package -DskipTests -U'
             }
         }       
+        stage('Deploy to Tomcat') {
+            steps {
+                 sh '''scp /var/lib/jenkins/workspace/spring-petclinic/target/spring-petclinic-3.5.0-SNAPSHOT.jar ubuntu@172.31.24.124:/var/lib/tomcat9/webapps/spring-petclinic.jar'''
+
+            }
+        }
     }
 }
-
