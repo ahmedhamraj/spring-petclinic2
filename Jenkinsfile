@@ -21,10 +21,11 @@ pipeline {
         }       
         stage('Deploy to Tomcat') {
             steps {
-                 sh '''sh '''scp -o StrictHostKeyChecking=no \
+                 sh '''scp -o StrictHostKeyChecking=no \
     /var/lib/jenkins/workspace/spring-petclinic/target/spring-petclinic-3.5.0-SNAPSHOT.jar 
     ubuntu@172.31.24.124:/var/lib/tomcat9/webapps/spring-petclinic.jar'''
             }
         }
     }
 }
+
