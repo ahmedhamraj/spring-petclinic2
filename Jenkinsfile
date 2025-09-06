@@ -18,12 +18,25 @@ pipeline {
             steps {
                 sh 'mvn clean package -DskipTests -U'
             }
-        }       
-        stage('Deploy to Tomcat') {
+        }    
+       stage('Deploy') {
             steps {
-                   sh '''scp /var/lib/jenkins/workspace/spring-petclinic/target/spring-petclinic-3.5.0-SNAPSHOT.jar ubuntu@172.31.24.124:/var/lib/tomcat9/webapps/spring-petclinic.jar'''
+                publishOverSsh([
+                    servers: [
+                        [
+                            serverName: 'target-server',
+                            transfers: [
+                                [
+                                    sourceFiles: 'target/spring-petclinic.jar',
+                                    removePrefix: 'target',
+                                    remoteDirectory: '/var/lib/tomcat9/webapps'
+                                ]
+                            ],
+                            execCommand: 'sudo systemctl restart tomcat9'
+                        ]
+                    ]
+                ])
             }
         }
     }
 }
-
