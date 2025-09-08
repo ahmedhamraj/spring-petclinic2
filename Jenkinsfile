@@ -18,13 +18,5 @@ pipeline
                 'mvn clean package -DskipTests -U'
             }
         }
-	stage('continus deploy') 
-        {
-            steps 
-            {
-                sh '''scp /var/lib/jenkins/workspace/spring-petclinic/target/spring-petclinic-3.5.0-SNAPSHOT.jar ubuntu@172.31.24.124:/var/lib/tomcat9/webapps/spring-petclinic.jar'''
- 
-            }
-        }
     }
 }
