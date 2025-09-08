@@ -1,22 +1,22 @@
-pipeline 
-{
+pipeline {
     agent any
 
-    stages 
-    {
-        stage('continus download') 
-        {
-            steps 
-            {
-                git branch: 'main', url: 'https://github.com/ahmedhamraj/spring-petclinic.git'
-            }
-        }
-        stage('continus build') 
-        {
-            steps 
-            {
-                'mvn clean package -DskipTests -U'
-            }
-        }
+    tools {
+        maven 'Maven3'   // Make sure Maven is configured in Jenkins
+        jdk 'JDK17'      // Configure JDK 17 in Jenkins global tool config
     }
-}
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main',
+                    url: 'https://github.com/ahmedhamraj/spring-petclinic.git'
+            }
+        }
+
+        stage('Build') {
+            steps {
+                sh 'mvn clean package -DskipTests'
+            }
+        }
+ }
