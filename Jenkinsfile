@@ -17,7 +17,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 git branch: 'main',
-                    url: 'https://https://github.com/ahmedhamraj/spring-petclinic.git'
+                    url: 'https://github.com/ahmedhamraj/spring-petclinic.git'
             }
         }
 
@@ -40,4 +40,5 @@ pipeline {
         }
     }
 }
+
 
