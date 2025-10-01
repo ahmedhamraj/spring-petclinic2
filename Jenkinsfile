@@ -30,7 +30,7 @@ pipeline {
             steps {
                 sh '''
                 # Copy jar to EC2
-                scp target/spring-petclinic-3.5.0-SNAPSHOT.jar ubuntu@172.31.17.72:/home/ubuntu/
+                scp target/spring-petclinic-3.5.0-SNAPSHOT.jar ubuntu@172.31.17.72:/home/
                 
                 # Run jar on EC2 in background
                 ssh ubuntu@172.31.17.72 'nohup java -jar /home/ubuntu/spring-petclinic-3.5.0-SNAPSHOT.jar &'
