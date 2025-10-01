@@ -28,5 +28,14 @@ pipeline {
         failure {
             echo 'Build failed. Check the logs.'
         }
+
+        stage('Deploy') {
+    steps {
+        sh '''
+        scp target/spring-petclinic-3.5.0-SNAPSHOT.jar ubuntu@172.31.17.72:/home/ubuntu/
+        ssh ubuntu@172.31.17.72 'nohup java -jar /home/ubuntu/spring-petclinic-3.5.0-SNAPSHOT.jar &'
+        '''
     }
+  }
+ }
 }
