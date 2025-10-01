@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     tools {
-        jdk 'java'
+        jdk 'java'   // Your configured JDK
         maven 'Maven'
     }
 
@@ -20,10 +20,19 @@ pipeline {
             }
         }
 
+        stage('Test') {
+            steps {
+                sh 'mvn test'
+            }
+        }
+
         stage('Deploy') {
             steps {
                 sh '''
+                # Copy jar to EC2
                 scp target/spring-petclinic-3.5.0-SNAPSHOT.jar ubuntu@172.31.17.72:/home/ubuntu/
+                
+                # Run jar on EC2 in background
                 ssh ubuntu@172.31.17.72 'nohup java -jar /home/ubuntu/spring-petclinic-3.5.0-SNAPSHOT.jar &'
                 '''
             }
