@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     tools {
-        jdk 'java'   // use the configured JDK name
+        jdk 'java'   // configured JDK name in Jenkins
         maven 'Maven'
     }
 
@@ -19,23 +19,23 @@ pipeline {
                 sh 'mvn clean package -DskipTests'
             }
         }
+
+        stage('Deploy') {
+            steps {
+                sh '''
+                scp target/spring-petclinic-3.5.0-SNAPSHOT.jar ubuntu@172.31.17.72:/home/ubuntu/
+                ssh ubuntu@172.31.17.72 'nohup java -jar /home/ubuntu/spring-petclinic-3.5.0-SNAPSHOT.jar &'
+                '''
+            }
+        }
     }
 
     post {
         success {
-            echo 'Build completed successfully!'
+            echo 'Pipeline completed successfully!'
         }
         failure {
-            echo 'Build failed. Check the logs.'
+            echo 'Pipeline failed. Check logs.'
         }
-
-        stage('Deploy') {
-    steps {
-        sh '''
-        scp target/spring-petclinic-3.5.0-SNAPSHOT.jar ubuntu@172.31.17.72:/home/ubuntu/
-        ssh ubuntu@172.31.17.72 'nohup java -jar /home/ubuntu/spring-petclinic-3.5.0-SNAPSHOT.jar &'
-        '''
     }
-  }
- }
 }
