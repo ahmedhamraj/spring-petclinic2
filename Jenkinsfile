@@ -7,10 +7,10 @@ pipeline {
     }
 
     environment {
-        EC2_USER = 'ubuntu'
-        EC2_HOST = '172.31.17.72'
+        EC2_USER = 'jenkins'
+        EC2_HOST = '172.31.21.234'
         // If using a .pem key, provide the full path here
-        PEM_KEY = '/var/lib/jenkins/jenkins.pem'
+        PEM_KEY = '/var/lib/jenkins/.ssh/jenkins-key'
         JAR_NAME = 'spring-petclinic-3.5.0-SNAPSHOT.jar'
     }
 
@@ -53,3 +53,4 @@ pipeline {
         }
     }
 }
+
