@@ -7,7 +7,7 @@ pipeline {
     }
 
     environment {
-        EC2_USER = 'jenkins'
+        EC2_USER = 'ubuntu'
         EC2_HOST = '172.31.21.234'
         // If using a .pem key, provide the full path here
         PEM_KEY = '/var/lib/jenkins/.ssh/jenkins-key'
@@ -53,4 +53,5 @@ pipeline {
         }
     }
 }
+
 
