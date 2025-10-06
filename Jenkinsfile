@@ -62,4 +62,36 @@ pipeline {
                 echo "Deploying to UAT environment (${UAT_SERVER})"
                 sh """
                     scp -i ${PEM_KEY} -o StrictHostKeyChecking=no target/${JAR_NAME} ${EC2_USER}@${UAT_SERVER}:${DEPLOY_PATH}/
-                    ssh -i ${PEM_KEY} -o StrictHostKeyCh_
+                    ssh -i ${PEM_KEY} -o StrictHostKeyChecking=no ${EC2_USER}@${UAT_SERVER} '
+                        nohup java -jar ${DEPLOY_PATH}/${JAR_NAME} >/dev/null 2>&1 &
+                        exit 0
+                    '
+                """
+            }
+        }
+
+        stage('Deploy to Prod') {
+            steps {
+                input message: "🚨 Final approval required to deploy to PROD!"
+                echo "Deploying to PROD environment (${PROD_SERVER})"
+                sh """
+                    scp -i ${PEM_KEY} -o StrictHostKeyChecking=no target/${JAR_NAME} ${EC2_USER}@${PROD_SERVER}:${DEPLOY_PATH}/
+                    ssh -i ${PEM_KEY} -o StrictHostKeyChecking=no ${EC2_USER}@${PROD_SERVER} '
+                        nohup java -jar ${DEPLOY_PATH}/${JAR_NAME} >/dev/null 2>&1 &
+                        exit 0
+                    '
+                """
+            }
+        }
+
+    }
+
+    post {
+        success {
+            echo "✅ Pipeline complete — deployed successfully through all environments!"
+        }
+        failure {
+            echo "❌ Pipeline failed — check which stage stopped."
+        }
+    }
+}
