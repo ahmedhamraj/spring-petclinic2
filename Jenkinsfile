@@ -1,97 +1,55 @@
 pipeline {
     agent any
 
-    environment {
-        EC2_USER   = 'ubuntu'
-        JAR_NAME   = 'spring-petclinic-3.5.0-SNAPSHOT.jar'
-        PEM_KEY    = '/var/lib/jenkins/.ssh/jenkins-key'
+    tools {
+        jdk 'java'   // your configured JDK in Jenkins
+        maven 'Maven'
+    }
 
-        DEV_SERVER  = '172.31.16.143'
-        QA_SERVER   = '172.31.27.38'
-        UAT_SERVER  = '172.31.19.230'
-        PROD_SERVER = '172.31.24.144'
-        DEPLOY_PATH = '/home/ubuntu'
+    environment {
+        EC2_USER = 'ubuntu'
+        EC2_HOST = '172.31.22.170'
+        // If using a .pem key, provide the full path here
+        PEM_KEY = '/var/lib/jenkins/.ssh/jenkins-key'
+        JAR_NAME = 'spring-petclinic-3.5.0-SNAPSHOT.jar'
     }
 
     stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main',
+                    url: 'https://github.com/ahmedhamraj/spring-petclinic2.git'
+            }
+        }
 
         stage('Build') {
             steps {
-                echo "Building ${JAR_NAME}..."
                 sh 'mvn clean package -DskipTests'
             }
         }
 
-        stage('Unit Test') {
+        stage('Test') {
             steps {
-                echo "Running unit tests..."
                 sh 'mvn test'
             }
         }
 
-        stage('Deploy to Dev') {
+        stage('Deploy') {
             steps {
-                echo "Deploying to DEV environment (${DEV_SERVER})"
-                sh """
-                    scp -i ${PEM_KEY} -o StrictHostKeyChecking=no target/${JAR_NAME} ${EC2_USER}@${DEV_SERVER}:${DEPLOY_PATH}/
-                    ssh -i ${PEM_KEY} -o StrictHostKeyChecking=no ${EC2_USER}@${DEV_SERVER} '
-                        nohup java -jar ${DEPLOY_PATH}/${JAR_NAME} >/dev/null 2>&1 &
-                        exit 0
-                    '
-                """
+               
+                // Option 1: Using PEM key for EC2 authentication
+                sh "scp -i ${PEM_KEY} -o StrictHostKeyChecking=no target/${JAR_NAME} ${EC2_USER}@${EC2_HOST}:/home/ubuntu/"
+                sh "ssh -i ${PEM_KEY} -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} 'nohup java -jar /home/ubuntu/${JAR_NAME} >/dev/null 2>&1 & exit'"
             }
         }
-
-        stage('Deploy to QA') {
-            steps {
-                input message: "Approve promotion to QA?"
-                echo "Deploying to QA environment (${QA_SERVER})"
-                sh """
-                    scp -i ${PEM_KEY} -o StrictHostKeyChecking=no target/${JAR_NAME} ${EC2_USER}@${QA_SERVER}:${DEPLOY_PATH}/
-                    ssh -i ${PEM_KEY} -o StrictHostKeyChecking=no ${EC2_USER}@${QA_SERVER} '
-                        nohup java -jar ${DEPLOY_PATH}/${JAR_NAME} >/dev/null 2>&1 &
-                        exit 0
-                    '
-                """
-            }
-        }
-
-        stage('Deploy to UAT') {
-            steps {
-                input message: "Approve promotion to UAT?"
-                echo "Deploying to UAT environment (${UAT_SERVER})"
-                sh """
-                    scp -i ${PEM_KEY} -o StrictHostKeyChecking=no target/${JAR_NAME} ${EC2_USER}@${UAT_SERVER}:${DEPLOY_PATH}/
-                    ssh -i ${PEM_KEY} -o StrictHostKeyChecking=no ${EC2_USER}@${UAT_SERVER} '
-                        nohup java -jar ${DEPLOY_PATH}/${JAR_NAME} >/dev/null 2>&1 &
-                        exit 0
-                    '
-                """
-            }
-        }
-
-        stage('Deploy to Prod') {
-            steps {
-                input message: "🚨 Final approval required to deploy to PROD!"
-                echo "Deploying to PROD environment (${PROD_SERVER})"
-                sh """
-                    scp -i ${PEM_KEY} -o StrictHostKeyChecking=no target/${JAR_NAME} ${EC2_USER}@${PROD_SERVER}:${DEPLOY_PATH}/
-                    ssh -i ${PEM_KEY} -o StrictHostKeyChecking=no ${EC2_USER}@${PROD_SERVER} '
-                        nohup java -jar ${DEPLOY_PATH}/${JAR_NAME} >/dev/null 2>&1 &
-                        exit 0
-                    '
-                """
-            }
-        }
-
     }
 
     post {
         success {
-            echo "✅ Pipeline complete — deployed successfully through all environments!"
+            echo 'Pipeline completed successfully!'
         }
         failure {
-            echo "❌ Pipeline failed — check which stage stopped."
+            echo 'Pipeline failed. Check the logs for details.'
         }
     }
 }
