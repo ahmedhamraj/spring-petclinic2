@@ -9,18 +9,20 @@ pipeline {
         PEM_KEY = '/var/lib/jenkins/.ssh/jenkins-key'
         JAR_NAME = 'spring-petclinic-3.5.0-SNAPSHOT.jar'
         EC2_USER = 'ubuntu'
-        SERVERS = [
-            dev: '172.31.16.143',
-            qa:  '172.31.27.38',
-            uat: '172.31.19.230',
-            prod:'172.31.24.144'
-        ]
     }
 
     stages {
         stage('Deploy') {
             steps {
                 script {
+                    // Define servers map here
+                    def SERVERS = [
+                        dev: '172.31.16.143',
+                        qa:  '172.31.27.38',
+                        uat: '172.31.19.230',
+                        prod:'172.31.24.144'
+                    ]
+
                     def EC2_HOST = SERVERS[params.ENV]
                     echo "Deploying to ${params.ENV.toUpperCase()} environment (${EC2_HOST})"
 
