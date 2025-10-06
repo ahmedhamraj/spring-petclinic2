@@ -10,6 +10,7 @@ pipeline {
         QA_SERVER   = '172.31.27.38'
         UAT_SERVER  = '172.31.19.230'
         PROD_SERVER = '172.31.24.144'
+        DEPLOY_PATH = '/home/ubuntu'
     }
 
     stages {
@@ -32,8 +33,11 @@ pipeline {
             steps {
                 echo "Deploying to DEV environment (${DEV_SERVER})"
                 sh """
-                    scp -i ${PEM_KEY} -o StrictHostKeyChecking=no target/${JAR_NAME} ${EC2_USER}@${DEV_SERVER}:/home/ubuntu/
-                    ssh -i ${PEM_KEY} -o StrictHostKeyChecking=no ${EC2_USER}@${DEV_SERVER} 'nohup java -jar /home/ubuntu/${JAR_NAME} >/dev/null 2>&1 & exit'
+                    scp -i ${PEM_KEY} -o StrictHostKeyChecking=no target/${JAR_NAME} ${EC2_USER}@${DEV_SERVER}:${DEPLOY_PATH}/
+                    ssh -i ${PEM_KEY} -o StrictHostKeyChecking=no ${EC2_USER}@${DEV_SERVER} '
+                        nohup java -jar ${DEPLOY_PATH}/${JAR_NAME} >/dev/null 2>&1 &
+                        exit 0
+                    '
                 """
             }
         }
@@ -43,8 +47,11 @@ pipeline {
                 input message: "Approve promotion to QA?"
                 echo "Deploying to QA environment (${QA_SERVER})"
                 sh """
-                    scp -i ${PEM_KEY} -o StrictHostKeyChecking=no target/${JAR_NAME} ${EC2_USER}@${QA_SERVER}:/home/ubuntu/
-                    ssh -i ${PEM_KEY} -o StrictHostKeyChecking=no ${EC2_USER}@${QA_SERVER} 'nohup java -jar /home/ubuntu/${JAR_NAME} >/dev/null 2>&1 & exit'
+                    scp -i ${PEM_KEY} -o StrictHostKeyChecking=no target/${JAR_NAME} ${EC2_USER}@${QA_SERVER}:${DEPLOY_PATH}/
+                    ssh -i ${PEM_KEY} -o StrictHostKeyChecking=no ${EC2_USER}@${QA_SERVER} '
+                        nohup java -jar ${DEPLOY_PATH}/${JAR_NAME} >/dev/null 2>&1 &
+                        exit 0
+                    '
                 """
             }
         }
@@ -54,5 +61,5 @@ pipeline {
                 input message: "Approve promotion to UAT?"
                 echo "Deploying to UAT environment (${UAT_SERVER})"
                 sh """
-                    scp -i ${PEM_KEY} -o StrictHostKeyChecking=no target/${JAR_NAME} ${EC2_USER}@${UAT_SERVER}:/home/ubuntu/
-                    ssh -i ${PEM_KEY} -o StrictHostKeyChecking=no ${EC2_USER}@${UAT_SERVER} 'nohup java -jar /home/ubuntu/${JAR_NAME} >/dev/null 2>&1 & exit'
+                    scp -i ${PEM_KEY} -o StrictHostKeyChecking=no target/${JAR_NAME} ${EC2_USER}@${UAT_SERVER}:${DEPLOY_PATH}/
+                    ssh -i ${PEM_KEY} -o StrictHostKeyCh_
