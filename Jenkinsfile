@@ -26,10 +26,22 @@ pipeline {
                     def EC2_HOST = SERVERS[params.ENV]
                     echo "Deploying to ${params.ENV.toUpperCase()} environment (${EC2_HOST})"
 
+                    // Copy the JAR to the server
                     sh """
                     scp -i ${PEM_KEY} -o StrictHostKeyChecking=no target/${JAR_NAME} ${EC2_USER}@${EC2_HOST}:/home/ubuntu/
-                    ssh -i ${PEM_KEY} -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} 'nohup java -jar /home/ubuntu/${JAR_NAME} >/dev/null 2>&1 & exit'
                     """
+
+                    // SSH into server: stop old app, start new app binding to 0.0.0.0
+                    sh """
+                    ssh -i ${PEM_KEY} -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} '
+                        # Stop existing app
+                        pkill -f "${JAR_NAME}" || true
+                        
+                        # Start app with logging
+                        nohup java -jar /home/ubuntu/${JAR_NAME} --server.address=0.0.0.0 > /home/ubuntu/app.log 2>&1 &
+                    '
+                    """
+                    echo "Deployment complete. App logs: http://${EC2_HOST}:8080 (check /home/ubuntu/app.log on server)"
                 }
             }
         }
